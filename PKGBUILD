@@ -45,14 +45,17 @@ build() {
     git submodule sync
     git submodule init
     git submodule update
-    git apply --stat ../0001-cmake-link-pthreads-libraries.patch
     cd ..
   fi
+
+  # apply patch
+  cd $_gitname
+  git apply --stat ../0001-cmake-link-pthreads-libraries.patch
+  cd ..
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
   rm -rf $_gitname-build
-
 
   cp -r $_gitname $_gitname-build
   cd $_gitname-build/
@@ -61,11 +64,17 @@ build() {
   cd build
 
   cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-    -DSC_WII=1 -DSUPERNOVA=1 -DSC_QT=1 -DNATIVE=1
+    -DSC_WII=1 -DSUPERNOVA=1 -DSC_QT=1 # -DNATIVE=1
 
   # -DSSE=1 -DSSE41=1 -DSSE42=1
 
   make
+
+  cd ../..
+
+  # remove patch
+  cd $_gitname
+  git checkout .
 }
 
 package() {
