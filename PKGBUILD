@@ -15,8 +15,8 @@ optdepends=('sc3-plugins-git: extra audio UGens'
             'swingosc: java based GUI system')
 conflicts=('supercollider')
 provides=('supercollider=3.6')
-source=("0001-cmake-link-pthreads-libraries.patch")
-md5sums=('dd6c3bd6c67cf14082124fce8a7bc70c')
+# source=("0001-cmake-link-pthreads-libraries.patch")
+# md5sums=('dd6c3bd6c67cf14082124fce8a7bc70c')
 
 install=sc3.install
 
@@ -43,15 +43,10 @@ build() {
     cd $_gitname
     git checkout -t origin/3.6
     git submodule sync
-    git submodule init
-    git submodule update
+    git submodule update --init
+    # git apply --stat ../0001-cmake-link-pthreads-libraries.patch
     cd ..
   fi
-
-  # apply patch
-  cd $_gitname
-  git apply --stat ../0001-cmake-link-pthreads-libraries.patch
-  cd ..
 
   msg "GIT checkout done or server timeout"
   msg "Starting make..."
@@ -69,12 +64,6 @@ build() {
   # -DSSE=1 -DSSE41=1 -DSSE42=1
 
   make
-
-  cd ../..
-
-  # remove patch
-  cd $_gitname
-  git checkout .
 }
 
 package() {
