@@ -2,7 +2,7 @@
 # Contributor: Björn Lindig <bjoern.lindig@googlemail.com>
 
 pkgname=supercollider-3.6-git
-pkgver=20130601
+pkgver=20130605
 pkgrel=1
 pkgdesc="An environment and programming language for real time audio synthesis and algorithmic composition (3.6 branch)."
 url="http://supercollider.sourceforge.net/"
@@ -17,6 +17,8 @@ conflicts=('supercollider')
 provides=('supercollider=3.6')
 # source=("0001-cmake-link-pthreads-libraries.patch")
 # md5sums=('dd6c3bd6c67cf14082124fce8a7bc70c')
+source=("emacs_gzip.patch")
+md5sums=('455c7904b800235c3dc32ff662b7176b')
 
 install=sc3.install
 
@@ -54,6 +56,9 @@ build() {
 
   cp -r $_gitname $_gitname-build
   cd $_gitname-build/
+
+  # apply scel patch
+  git apply ../emacs_gzip.patch
 
   mkdir build
   cd build
