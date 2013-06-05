@@ -60,6 +60,9 @@ build() {
   # apply scel patch
   git apply ../emacs_gzip.patch
 
+  # remove tree-widget.el
+  rm editors/scel/el/tree-widget.el
+
   mkdir build
   cd build
 
