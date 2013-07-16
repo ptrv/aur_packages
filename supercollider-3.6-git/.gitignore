@@ -1,0 +1,6 @@
+*
+!PKGBUILD
+!0001-cmake-link-pthreads-libraries.patch
+!sc3.install
+!.gitignore
+!*.xz

@@ -1,0 +1,75 @@
+# Maintainer:  Bernardo Barros <bernardobarros@gmail.com>
+# Contributor: Björn Lindig <bjoern.lindig@googlemail.com>
+
+pkgname=supercollider-3.6-git
+pkgver=20130708
+pkgrel=1
+pkgdesc="An environment and programming language for real time audio synthesis and algorithmic composition (3.6 branch)."
+url="http://supercollider.sourceforge.net/"
+arch=('i686' 'x86_64')
+license=('GPL')
+depends=('jack' 'fftw' 'avahi' 'ruby' 'icu' 'cwiid' 'rsync' 'qtwebkit')
+makedepends=('git' 'libsndfile>=1.0' 'emacs' 'vim' 'gedit' 'pkgconfig>=0.14.0' 'cmake' 'alsa-lib'
+'boost')
+optdepends=('sc3-plugins-git: extra audio UGens'
+            'swingosc: java based GUI system')
+conflicts=('supercollider')
+provides=('supercollider=3.6')
+# source=("0001-cmake-link-pthreads-libraries.patch")
+# md5sums=('dd6c3bd6c67cf14082124fce8a7bc70c')
+
+_gitname=supercollider
+
+source=("$_gitname::git+https://github.com/supercollider/supercollider.git#branch=3.6" "emacs_gzip.patch")
+md5sums=('SKIP' '455c7904b800235c3dc32ff662b7176b')
+
+install=sc3.install
+
+pkgver() {
+  cd $srcdir/$_gitname
+  # #git describe --always | sed 's|-|.|g'
+  # echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+  #date +%Y%m%d
+  git log -1 --format="%cd" --date=short | tr -d '-'
+}
+
+prepare() {
+
+  cd "$srcdir/$_gitname"
+
+  msg "Update submodules..."
+  git submodule sync
+  git submodule update --init
+
+  msg "Apply patches..."
+  # apply scel patch
+  git apply ../emacs_gzip.patch
+
+  # remove tree-widget.el
+  rm editors/scel/el/tree-widget.el
+}
+
+build() {
+
+  export LDFLAGS="${LDFLAGS//-Wl,--as-needed}"
+
+  cd "$srcdir/$_gitname"
+
+  mkdir build
+  cd build
+
+  cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
+    -DSC_WII=1 -DSUPERNOVA=1 -DSC_QT=1 -DENABLE_TESTSUITE=0 \
+    -DBUILD_TESTING=0 # -DNATIVE=1
+
+  # -DSSE=1 -DSSE41=1 -DSSE42=1
+
+  make
+}
+
+package() {
+
+  cd "$srcdir/$_gitname/build"
+
+  make DESTDIR=$pkgdir/ install
+}
