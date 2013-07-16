@@ -2,7 +2,7 @@
 # Contributor: Björn Lindig <bjoern.lindig@googlemail.com>
 
 pkgname=supercollider-3.6-git
-pkgver=20130605
+pkgver=20130708
 pkgrel=1
 pkgdesc="An environment and programming language for real time audio synthesis and algorithmic composition (3.6 branch)."
 url="http://supercollider.sourceforge.net/"
@@ -17,57 +17,50 @@ conflicts=('supercollider')
 provides=('supercollider=3.6')
 # source=("0001-cmake-link-pthreads-libraries.patch")
 # md5sums=('dd6c3bd6c67cf14082124fce8a7bc70c')
-source=("emacs_gzip.patch")
-md5sums=('455c7904b800235c3dc32ff662b7176b')
+
+_gitname=supercollider
+
+source=("$_gitname::git+https://github.com/supercollider/supercollider.git#branch=3.6" "emacs_gzip.patch")
+md5sums=('SKIP' '455c7904b800235c3dc32ff662b7176b')
 
 install=sc3.install
 
-# Official git repo
-_gitroot="git://github.com/supercollider/supercollider.git"
-_gitname="supercollider"
+pkgver() {
+  cd $srcdir/$_gitname
+  # #git describe --always | sed 's|-|.|g'
+  # echo $(git rev-list --count HEAD).$(git rev-parse --short HEAD)
+  #date +%Y%m%d
+  git log -1 --format="%cd" --date=short | tr -d '-'
+}
 
-build() {
+prepare() {
 
-  export LDFLAGS="${LDFLAGS//-Wl,--as-needed}"
+  cd "$srcdir/$_gitname"
 
-  cd $srcdir
-  msg "Connecting to GIT server...."
+  msg "Update submodules..."
+  git submodule sync
+  git submodule update --init
 
-  if [ -d $_gitname ] ; then
-    cd $_gitname
-    git pull origin
-    git submodule sync
-    git submodule update --init
-    cd ..
-    msg "The local files are updated."
-  else
-    git clone $_gitroot
-    cd $_gitname
-    git checkout -t origin/3.6
-    git submodule sync
-    git submodule update --init
-    # git apply --stat ../0001-cmake-link-pthreads-libraries.patch
-    cd ..
-  fi
-
-  msg "GIT checkout done or server timeout"
-  msg "Starting make..."
-  rm -rf $_gitname-build
-
-  cp -r $_gitname $_gitname-build
-  cd $_gitname-build/
-
+  msg "Apply patches..."
   # apply scel patch
   git apply ../emacs_gzip.patch
 
   # remove tree-widget.el
   rm editors/scel/el/tree-widget.el
+}
+
+build() {
+
+  export LDFLAGS="${LDFLAGS//-Wl,--as-needed}"
+
+  cd "$srcdir/$_gitname"
 
   mkdir build
   cd build
 
   cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release \
-    -DSC_WII=1 -DSUPERNOVA=1 -DSC_QT=1 # -DNATIVE=1
+    -DSC_WII=1 -DSUPERNOVA=1 -DSC_QT=1 -DENABLE_TESTSUITE=0 \
+    -DBUILD_TESTING=0 # -DNATIVE=1
 
   # -DSSE=1 -DSSE41=1 -DSSE42=1
 
@@ -76,7 +69,7 @@ build() {
 
 package() {
 
-  cd $srcdir/$_gitname-build/build
+  cd "$srcdir/$_gitname/build"
 
   make DESTDIR=$pkgdir/ install
 }
