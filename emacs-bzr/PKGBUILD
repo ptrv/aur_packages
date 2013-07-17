@@ -10,7 +10,7 @@ _opt_puresize="1820000"
 
 pkgname=emacs-bzr
 _pkgname=emacs
-pkgver=113431
+pkgver=113441
 pkgrel=1
 pkgdesc='The extensible, customizable, self-documenting real-time display editor from its official Bzr repository'
 arch=('i686' 'x86_64')
