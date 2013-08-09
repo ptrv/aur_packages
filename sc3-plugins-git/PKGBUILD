@@ -1,7 +1,7 @@
 # Maintainer: Bernardo Barros <bbarros@xsounds.org>
 
 pkgname=sc3-plugins-git
-pkgver=20130601
+pkgver=20130717
 pkgrel=1
 pkgdesc="Plugins for SuperCollider (Git version)"
 url="http://supercollider.sourceforge.net/"
